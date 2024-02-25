@@ -1,0 +1,57 @@
+version: '3'
+services:
+  service1:
+    build:
+      context: ./service1
+    depends_on:
+      - message-broker
+    networks:
+      - mynetwork
+
+  service2:
+    build:
+      context: ./service2
+    depends_on:
+      - message-broker
+    networks:
+      - mynetwork
+
+  monitor:
+    build:
+      context: ./monitor
+    depends_on:
+      - message-broker
+    networks:
+      - mynetwork
+
+  message-broker:
+    image: 'rabbitmq:management'
+    hostname: message-broker
+    networks:
+      - mynetwork
+
+  api-gateway:
+    build: 
+      context: ./api-gateway
+    depends_on:
+      - monitor
+    networks:
+      - mynetwork
+    ports:
+      - "8083:8083"
+
+  tests:
+    build:
+      context: ./tests
+    depends_on:
+      - api-gateway
+      - monitor
+      - service1
+      - service2
+    networks:
+      - mynetwork
+    volumes:
+      - ./tests:/app
+
+networks:
+  mynetwork:

@@ -1,0 +1,52 @@
+image: docker:24.0.5
+
+variables:
+  DOCKER_HOST: tcp://localhost:2376/
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - name: docker:24.0.5-dind
+
+before_script:
+  - docker info
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker-compose build
+  only:
+    - main
+
+lint:
+  stage: test
+  script:
+    - docker-compose run --no-deps api-gateway npm run lint
+  dependencies:
+    - build
+  only:
+    - main
+
+test:
+  stage: test
+  script:
+    - docker-compose build
+    - docker-compose up -d
+    - docker-compose run --no-deps tests npm test
+  dependencies:
+    - build
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - docker-compose up -d
+  dependencies:
+    - build
+  only:
+    - main
