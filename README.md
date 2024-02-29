@@ -63,6 +63,7 @@ docker-compose up -d
 To execute the tests:
 
 docker-compose run --no-deps tests npm test
+
 To execute ESLint:
 
 docker-compose run --no-deps api-gateway npm run lint
